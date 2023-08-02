@@ -18,6 +18,7 @@ conversations.pkl
 accounts.txt
 
 .idea/
+.vscode
 
 **/__pycache__/
 
