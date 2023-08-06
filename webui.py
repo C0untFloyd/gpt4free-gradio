@@ -1,15 +1,15 @@
 import time
 import gradio as gr
 import g4f
-from utility.util_providers import get_all_providers, test_all_providers, get_provider_by_name
+from utility.util_providers import get_all_providers, test_all_providers
 
 restart_server = False
 live_cam_active = False
 
 
-def prompt_ai(select_providers: str, prompt):
+def prompt_ai(select_providers: str, prompt: str, chatbot):
     if len(prompt) < 1:
-        return None
+        return '',chatbot
     s = select_providers.split(' provided by ')
     model = s[0]
     # provider = get_provider_by_name(s[1])
@@ -24,9 +24,9 @@ def prompt_ai(select_providers: str, prompt):
                     }
                     ],provider=provider,auth=None)
     except Exception as e:
-        result = ''
-        raise f'Error {e}'
-    return result
+        result = f'{e}'
+    chatbot.append((prompt, result))
+    return '',chatbot
 
 def check_providers():
     return gr.Dropdown.update(choices=test_all_providers())
@@ -50,26 +50,25 @@ def run():
 
     while run_server:
 
-        with gr.Blocks(title=f'gpt4free UI', theme='freddyaboulton/dracula_revamped', css="span {color: var(--block-info-text-color)}") as ui:
+        with gr.Blocks(title=f'gpt4free UI', theme='Default', css="span {color: var(--block-info-text-color)}") as ui:
             with gr.Row(variant='panel'):
                     gr.Markdown(f"### [gpt4free Frontend](https://github.com/C0untFloyd/gpt4free-gradio)")
             with gr.Row(variant='panel'):
-                select_providers = gr.Dropdown(providerlist, label="Select Model / Provider", index=0)
+                select_providers = gr.Dropdown(providerlist, label="Select Model / Provider")
                 bt_check_providers = gr.Button("Check and update list", variant='primary')
-
+            with gr.Row(variant='panel'):
+                chatbot = gr.Chatbot(label="Response")
             with gr.Row(variant='panel'):
                 user_prompt = gr.Textbox(label="Prompt", placeholder="Hello")
             with gr.Row(variant='panel'):
                 bt_send_prompt = gr.Button("Send", variant='primary')
-            with gr.Row(variant='panel'):
-                response = gr.Textbox(label="Response")
-
+ 
             bt_check_providers.click(fn=check_providers, outputs=[select_providers])
-            bt_send_prompt.click(fn=prompt_ai, inputs=[select_providers, user_prompt], outputs=[response])
+            bt_send_prompt.click(fn=prompt_ai, inputs=[select_providers, user_prompt, chatbot], outputs=[user_prompt, chatbot])
 
         restart_server = False
         try:
-            ui.queue().launch(inbrowser=True, server_name=server_name, server_port=server_port, share=True, prevent_thread_lock=True, show_error=True)
+            ui.queue().launch(inbrowser=True, server_name=server_name, server_port=server_port, share=False, prevent_thread_lock=True, show_error=True)
         except:
             restart_server = True
             run_server = False
