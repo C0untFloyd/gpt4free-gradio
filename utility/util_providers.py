@@ -1,5 +1,6 @@
 from colorama import Fore
-from g4f import Provider,ModelUtils,ChatCompletion
+from g4f import Provider,ChatCompletion
+from g4f.models import ModelUtils
 
 
 # if prover need auth parameter
@@ -69,3 +70,4 @@ def get_provider_by_name(name: str):
     providers = [a for a in dir(Provider) if not a.startswith('__') and a != 'Provider' and a != 'Providers']
     found =  next(x for x in providers if str(x) == name)
     return found
+
