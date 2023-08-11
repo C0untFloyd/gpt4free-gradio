@@ -55,7 +55,7 @@ def run():
                     gr.Markdown(f"### [gpt4free Frontend](https://github.com/C0untFloyd/gpt4free-gradio)")
             with gr.Row(variant='panel'):
                 select_providers = gr.Dropdown(providerlist, label="Select Model / Provider")
-                bt_check_providers = gr.Button("Check and update list", variant='primary')
+                bt_check_providers = gr.Button("Check and update list", variant='secondary')
             with gr.Row(variant='panel'):
                 chatbot = gr.Chatbot(label="Response")
             with gr.Row(variant='panel'):

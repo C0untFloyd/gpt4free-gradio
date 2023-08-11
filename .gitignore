@@ -17,6 +17,8 @@ conversations.pkl
 # Ignore accounts created by api's
 accounts.txt
 
+*.bat
+
 .idea/
 .vscode
 
