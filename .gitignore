@@ -17,27 +17,21 @@ conversations.pkl
 # Ignore accounts created by api's
 accounts.txt
 
-*.bat
-
 .idea/
-.vscode
-
 **/__pycache__/
-
 __pycache__/
 
-*.log
-
-cookie.json
-
-*.pyc
-
 dist/
+*.log
+*.pyc
 *.egg-info/
 *.egg
 *.egg-info
 build
+
 test.py
+update.py
+cookie.json
 
 # Emacs crap
 *~

@@ -7,4 +7,3 @@ browser_cookie3
 websockets
 pyexecjs
 js2py
-gradio>=3.38.0
