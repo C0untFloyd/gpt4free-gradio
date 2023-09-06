@@ -58,11 +58,11 @@ def get_all_providers():
     providers = [a for a in dir(Provider) if not a.startswith('__') and a != 'Provider' and a != 'Providers']
     for provider in providers:
         # get all model in provider
-        models = getattr(Provider,provider).model
-        if isinstance(models,str):
-            models = [models]
-        for model in models:
-            list_providers.append(f'{model} provided by {str(provider)}')
+        # models = getattr(Provider,provider).model
+        # if isinstance(models,str):
+        #     models = [models]
+        # for model in models:
+        list_providers.append(f'bla provided by {str(provider)}')
     list_providers.sort()
     return list_providers
 
