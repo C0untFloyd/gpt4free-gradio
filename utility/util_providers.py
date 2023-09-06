@@ -1,7 +1,7 @@
 from colorama import Fore
 from g4f import Provider,ChatCompletion
 from g4f.models import ModelUtils
-
+import g4f
 
 # if prover need auth parameter
 provider_auth_settings = {
@@ -20,19 +20,20 @@ def test_all_providers():
 
         print(Fore.WHITE +f"Testing Provider {provider}...")
         # get all model in provider
-        models = getattr(Provider,provider).model
-        if isinstance(models,str):
-            models = [models]
+        # models = getattr(Provider,provider).model
+        # if isinstance(models,str):
+        #     models = [models]
+        models = [g4f.models.default]
         for model in models:
             print(Fore.WHITE +f"Trying model {model}...")
             provider_llm = getattr(Provider,provider)
             # force provider to testing
             provider_llm.working = True
 
-            model_llm = ModelUtils.convert[model.lower()]
+            # model_llm = ModelUtils.convert[model.lower()]
             try:
                 # make request
-                result = ChatCompletion.create(model=model_llm, stream=False,messages=[
+                result = ChatCompletion.create(model=g4f.models.default, stream=False,messages=[
                 {
                     "role": "user",
                     "content": "Say 'Hello World!'."
@@ -55,14 +56,11 @@ def test_all_providers():
 
 def get_all_providers():
     list_providers = []
-    providers = [a for a in dir(Provider) if not a.startswith('__') and a != 'Provider' and a != 'Providers']
+    providers = [a for a in dir(Provider) if not a.startswith('__') and a != 'annotations' and a != 'base_provider']
     for provider in providers:
-        # get all model in provider
-        # models = getattr(Provider,provider).model
-        # if isinstance(models,str):
-        #     models = [models]
-        # for model in models:
-        list_providers.append(f'bla provided by {str(provider)}')
+        provider_llm = getattr(Provider,provider)
+        if provider_llm.working:
+            list_providers.append(f'{str(provider)}')
     list_providers.sort()
     return list_providers
 
