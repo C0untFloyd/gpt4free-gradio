@@ -1,7 +1,10 @@
 import time
 import gradio as gr
+import asyncio
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 import g4f
-from utility.util_providers import get_all_providers, test_all_providers
+from utility.util_providers import get_all_models, get_providers_for_model, get_provider_info, send_chat
 
 restart_server = False
 live_cam_active = False
@@ -9,47 +12,30 @@ live_cam_active = False
 context_history = []
 
 
-def prompt_ai(select_providers: str, prompt: str, chatbot):
+def prompt_ai(selected_model: str, selected_provider: str, prompt: str, chatbot):
     global context_history
 
-    if len(prompt) < 1:
+    if len(prompt) < 1 or selected_model is None or len(selected_model) < 1:
+        gr.Warning("No text or no model selected!")
         return '',chatbot
-    # s = select_providers.split(' provided by ')
-    # model = s[0]
-    # provider = get_provider_by_name(s[1])
-    provider = getattr(g4f.Provider,select_providers)
-    provider.working = True
 
     # remove first 2 prompts to avoid payload error
     if len(context_history) > 8:
         context_history.pop(0)
         context_history.pop(0)
 
-
     context_history.append({'role': 'user', 'content': str(prompt)})
-
-    try:
-        result = g4f.ChatCompletion.create(model=g4f.models.default, stream=False,
-                                           messages=context_history,provider=provider,auth=None)
-        context_history.append({'role': 'assistant', 'content': str(result)})
-    except Exception as e:
-        result = f'{e}'
-        context_history = []
-
+    result, context_history = send_chat(selected_model, selected_provider, context_history)
     chatbot.append((prompt, result))
     return '',chatbot
 
 def check_providers():
-    return gr.Dropdown.update(choices=test_all_providers())
+    return gr.Dropdown.update(choices=get_all_models())
 
 
 def run():
-
     available_themes = ["Default", "gradio/glass", "gradio/monochrome", "gradio/seafoam", "gradio/soft", "gstaff/xkcd", "freddyaboulton/dracula_revamped", "ysharma/steampunk"]
-    providerlist = get_all_providers()
-
-    # providerlist = ['falcon-40b provided by H2o', 'falcon-7b provided by H2o', 'gpt-3.5-turbo provided by Acytoo', 'gpt-3.5-turbo provided by AiService',
-    #                  'gpt-3.5-turbo provided by Wewordle', 'gpt-4 provided by ChatgptAi', 'llama-13b provided by H2o']
+    modellist = get_all_models()
 
     server_name = None
     if server_name is None or len(server_name) < 1:
@@ -65,8 +51,14 @@ def run():
             with gr.Row(variant='panel'):
                     gr.Markdown(f"### [gpt4free Frontend](https://github.com/C0untFloyd/gpt4free-gradio)")
             with gr.Row(variant='panel'):
-                select_providers = gr.Dropdown(providerlist, label="Select Model / Provider")
-                bt_check_providers = gr.Button("Check and update list", variant='secondary')
+                with gr.Column():
+                    select_model = gr.Dropdown(modellist, label="Select Model")
+                with gr.Column():
+                    select_provider = gr.Dropdown(label="Select Provider", allow_custom_value=True, interactive=True)
+                with gr.Column():
+                    provider_info = gr.Markdown("")
+                with gr.Column():
+                    bt_check_providers = gr.Button("Check and update list", variant='secondary')
             with gr.Row(variant='panel'):
                 chatbot = gr.Chatbot(label="Response", show_copy_button=True, avatar_images=('user.png','chatbot.png'), bubble_full_width=False)
             with gr.Row(variant='panel'):
@@ -75,7 +67,7 @@ def run():
                     bt_send_prompt = gr.Button("Send", variant='primary')
                 with gr.Column():
                     examples = [
-                        "Hello",
+                        "Hello, please identify yourself.",
                         """
         Let's create a game. Here are the game rules:
 
@@ -90,9 +82,11 @@ def run():
                         ]
                     examples = gr.Examples(examples=examples, inputs=user_prompt)
  
-            bt_check_providers.click(fn=check_providers, outputs=[select_providers])
-            user_prompt.submit(fn=prompt_ai, inputs=[select_providers, user_prompt, chatbot], outputs=[user_prompt, chatbot])
-            bt_send_prompt.click(fn=prompt_ai, inputs=[select_providers, user_prompt, chatbot], outputs=[user_prompt, chatbot])
+            select_model.change(fn=on_select_model, inputs=select_model, outputs=select_provider)
+            select_provider.change(fn=on_select_provider, inputs=[select_provider], outputs=provider_info)
+            # bt_check_providers.click(fn=check_providers, outputs=[select_model])
+            user_prompt.submit(fn=prompt_ai, inputs=[select_model, select_provider, user_prompt, chatbot], outputs=[user_prompt, chatbot])
+            bt_send_prompt.click(fn=prompt_ai, inputs=[select_model, select_provider, user_prompt, chatbot], outputs=[user_prompt, chatbot])
 
         restart_server = False
         try:
@@ -109,7 +103,17 @@ def run():
         ui.close()
 
 
+def on_select_model(model):
+    global context_history
 
+    context_history = []
+    newprovs = get_providers_for_model(model)
+    return gr.Dropdown.update(choices=newprovs, value=newprovs[0])
+
+def on_select_provider(provider):
+    info = get_provider_info(provider)
+    return info
+     
 
 def restart():
     global restart_server
