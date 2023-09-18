@@ -10,14 +10,17 @@ provider_auth_settings = {
 
 
 def send_chat(selected_model, selected_provider, context_history):
-    prov = getattr(g4f.Provider, selected_provider)
-    prov.working = True
+    if selected_provider is not None:
+        prov = getattr(g4f.Provider, selected_provider)
+        prov.working = True
+        auth = None
+        if prov.needs_auth:
+            auth=provider_auth_settings['Bard']
+    else:
+        auth=None
+        prov=None
+
     print(f'Using Model {selected_model} provided by {selected_provider}')
-
-    auth = None
-
-    if prov.needs_auth:
-        auth=provider_auth_settings['Bard']
 
     try:
         result = g4f.ChatCompletion.create(model=selected_model, stream=False, provider=prov,
@@ -48,10 +51,17 @@ def get_providers_for_model(m):
         else:
             prov = model.best_provider
             providers.append(prov.__name__)
+    # else:
+    #     if model.base_provider is not None:
+    #         providers.append(model.base_provider)
+
     providers.sort()
     return providers
         
 def get_provider_info(provider):
+    if provider is None:
+        return ''
+    
     prov = getattr(g4f.Provider, provider)
     auth_str = '🔐' if prov.needs_auth else '🔓'
     working = '✅' if prov.working else '❌'
