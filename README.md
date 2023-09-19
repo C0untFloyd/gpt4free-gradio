@@ -2,6 +2,7 @@
 
 ![Screen](docs/main-ui.png)
 
+Python version lower than 3.11 needed!
 pip install -r requirements.txt
 
 To run:
