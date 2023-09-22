@@ -45,8 +45,8 @@ def get_providers_for_model(m):
     providers = []
     model = g4f.models.ModelUtils.convert[m]
     if model.best_provider is not None:
-        if type(model.best_provider) is list:
-            for p in model.best_provider:
+        if hasattr(model.best_provider, 'providers'):
+            for p in model.best_provider.providers:
                 providers.append(p.__name__)
         else:
             prov = model.best_provider
