@@ -8,6 +8,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 import asyncio
 from g4f import models
 from g4f.Provider.base_provider import AsyncProvider, BaseProvider
+from g4f.Provider.retry_provider import RetryProvider
 from testing.test_providers import get_providers
 
 logging = False
@@ -20,6 +21,7 @@ def print_imports():
     for _provider in get_providers():
         if _provider.working:
             print(f"    {_provider.__name__},")
+                
     print(")")
     print("# Usage:")
     print("response = g4f.ChatCompletion.create(..., provider=ProviderName)")
@@ -78,16 +80,20 @@ def print_providers():
         for idx, _provider in enumerate(providers):
             if is_working != _provider.working:
                 continue
+            if _provider == RetryProvider:
+                continue
+            
             netloc = urlparse(_provider.url).netloc
             website = f"[{netloc}]({_provider.url})"
 
-            provider_name = f"g4f.provider.{_provider.__name__}"
+            provider_name = f"`g4f.Provider.{_provider.__name__}`"
 
             has_gpt_35 = "✔️" if _provider.supports_gpt_35_turbo else "❌"
             has_gpt_4 = "✔️" if _provider.supports_gpt_4 else "❌"
             stream = "✔️" if _provider.supports_stream else "❌"
             can_async = "✔️" if issubclass(_provider, AsyncProvider) else "❌"
             if _provider.working:
+                status = '![Active](https://img.shields.io/badge/Active-brightgreen)'
                 if responses[idx]:
                     status = '![Active](https://img.shields.io/badge/Active-brightgreen)'
                 else:
