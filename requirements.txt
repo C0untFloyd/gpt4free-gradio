@@ -11,3 +11,7 @@ flask-cors
 gradio
 pyexecjs
 typing-extensions
+transformers
+PyExecJS
+tensorflow
+torch
