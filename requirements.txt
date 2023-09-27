@@ -9,9 +9,5 @@ js2py
 flask
 flask-cors
 gradio
-pyexecjs
 typing-extensions
-transformers
 PyExecJS
-tensorflow
-torch
