@@ -1,8 +1,8 @@
 from __future__ import annotations
-import requests
 
-from .base_provider import BaseProvider
-from ..typing import CreateResult
+from ..requests import StreamSession
+from .base_provider import AsyncGeneratorProvider
+from ..typing import AsyncGenerator
 
 models = {
     'gpt-3.5-turbo': {'id': 'gpt-3.5-turbo', 'name': 'GPT-3.5'},
@@ -15,7 +15,7 @@ models = {
     'gpt-4-32k-0613': {'id': 'gpt-4-32k-0613', 'name': 'GPT-4-32K-0613'},
 }
 
-class Aivvm(BaseProvider):
+class Aivvm(AsyncGeneratorProvider):
     url                   = 'https://chat.aivvm.com'
     supports_stream       = True
     working               = True
@@ -23,15 +23,18 @@ class Aivvm(BaseProvider):
     supports_gpt_4        = True
 
     @classmethod
-    def create_completion(cls,
+    async def create_async_generator(
+        cls,
         model: str,
         messages: list[dict[str, str]],
         stream: bool,
+        timeout: int = 30,
         **kwargs
-    ) -> CreateResult:
+    ) -> AsyncGenerator:
         if not model:
             model = "gpt-3.5-turbo"
         elif model not in models:
+<<<<<<< HEAD
             raise ValueError(f"Model are not supported: {model}")
     
         headers = {
@@ -49,6 +52,9 @@ class Aivvm(BaseProvider):
             "sec-fetch-site"     : "same-origin",
             "user-agent"         : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
         }
+=======
+            raise ValueError(f"Model is not supported: {model}")
+>>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
 
         json_data = {
             "model"       : models[model],
@@ -57,12 +63,25 @@ class Aivvm(BaseProvider):
             "prompt"      : "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
             "temperature" : kwargs.get("temperature", 0.7)
         }
+<<<<<<< HEAD
 
         response = requests.post(
             "https://chat.aivvm.com/api/chat", headers=headers, json=json_data, stream=True)
 
         for line in response.iter_content(chunk_size=1048):
             yield line.decode('utf-8')
+=======
+        headers = {
+            "Accept": "*/*",
+            "Origin": cls.url,
+            "Referer": f"{cls.url}/",
+        }
+        async with StreamSession(impersonate="chrome107", headers=headers, timeout=timeout) as session:
+            async with session.post(f"{cls.url}/api/chat", json=json_data) as response:
+                response.raise_for_status()
+                async for chunk in response.iter_content():
+                    yield chunk.decode()
+>>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
 
     @classmethod
     @property

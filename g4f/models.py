@@ -4,6 +4,7 @@ from .typing     import Union
 from .Provider   import BaseProvider, RetryProvider
 from .Provider   import (
     ChatgptLogin,
+<<<<<<< HEAD
     ChatgptAi, 
     ChatBase, 
     Vercel, 
@@ -18,6 +19,31 @@ from .Provider   import (
     Yqcloud,
     AItianhu,
     Aichat,
+=======
+    ChatgptDemo,
+    ChatgptDuo,
+    Vitalentum,
+    ChatgptAi,
+    ChatForAi,
+    AItianhu,
+    ChatBase,
+    Liaobots,
+    Yqcloud,
+    Myshell,
+    FreeGpt,
+    Vercel, 
+    DeepAi,
+    Aichat,
+    AiAsk,
+    Aivvm, 
+    GptGo,
+    Ylokh,
+    Bard, 
+    Aibn,
+    Bing,
+    You,
+    H2o
+>>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
 )
 
 @dataclass(unsafe_hash=True)
@@ -26,18 +52,29 @@ class Model:
     base_provider: str
     best_provider: Union[type[BaseProvider], RetryProvider] = None
 
-# Config for HuggingChat, OpenAssistant
-# Works for Liaobots, H2o, OpenaiChat, Yqcloud, You
 default = Model(
     name          = "",
     base_provider = "",
     best_provider = RetryProvider([
         Bing,         # Not fully GPT 3 or 4
-        PerplexityAi, # Adds references to sources
-        Wewordle,     # Responds with markdown
         Yqcloud,      # Answers short questions in chinese
         ChatBase,     # Don't want to answer creatively
+<<<<<<< HEAD
         DeepAi, ChatgptLogin, ChatgptAi, Aivvm, GptGo, AItianhu, Aichat,
+=======
+        ChatgptDuo,   # Include search results
+        Aibn, Aichat, Aivvm, ChatForAi, ChatgptAi, ChatgptLogin, DeepAi, FreeGpt, GptGo, Myshell, Ylokh,
+    ])
+)
+
+# GPT-3.5 too, but all providers supports long responses and a custom timeouts
+gpt_35_long = Model(
+    name          = 'gpt-3.5-turbo',
+    base_provider = 'openai',
+    best_provider = RetryProvider([
+        AiAsk, Aibn, Aichat, Aivvm, ChatForAi, ChatgptAi, ChatgptDemo, ChatgptDuo,
+        FreeGpt, GptGo, Liaobots, Myshell, Vitalentum, Ylokh, You, Yqcloud
+>>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
     ])
 )
 
@@ -46,16 +83,24 @@ gpt_35_turbo = Model(
     name          = 'gpt-3.5-turbo',
     base_provider = 'openai',
     best_provider = RetryProvider([
+<<<<<<< HEAD
         DeepAi, ChatgptLogin, ChatgptAi, Aivvm, GptGo, AItianhu, Aichat,
+=======
+        DeepAi, ChatgptLogin, ChatgptAi, Aivvm, GptGo, AItianhu, Aichat, AItianhuSpace, Myshell, Aibn, ChatForAi, FreeGpt, Ylokh
+>>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
     ])
 )
 
 gpt_4 = Model(
     name          = 'gpt-4',
     base_provider = 'openai',
+<<<<<<< HEAD
     best_provider = RetryProvider([
             Aivvm
     ])
+=======
+    best_provider = Bing
+>>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
 )
 
 # Bard
@@ -201,6 +246,7 @@ class ModelUtils:
     convert: dict[str, Model] = {
         # gpt-3.5 / gpt-4
         'gpt-3.5-turbo'          : gpt_35_turbo,
+        'gpt-3.5-turbo-0613'     : gpt_35_turbo_0613,
         'gpt-3.5-turbo-16k'      : gpt_35_turbo_16k,
         'gpt-4'                  : gpt_4,
         'gpt-4-0613'             : gpt_4_0613,
