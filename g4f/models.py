@@ -4,22 +4,6 @@ from .typing     import Union
 from .Provider   import BaseProvider, RetryProvider
 from .Provider   import (
     ChatgptLogin,
-<<<<<<< HEAD
-    ChatgptAi, 
-    ChatBase, 
-    Vercel, 
-    DeepAi, 
-    Aivvm, 
-    Bard, 
-    H2o,
-    GptGo,
-    Bing,
-    PerplexityAi,
-    Wewordle,
-    Yqcloud,
-    AItianhu,
-    Aichat,
-=======
     ChatgptDemo,
     ChatgptDuo,
     Vitalentum,
@@ -36,6 +20,8 @@ from .Provider   import (
     Aichat,
     AiAsk,
     Aivvm, 
+    Bard, 
+    H2o,
     GptGo,
     Ylokh,
     Bard, 
@@ -43,7 +29,6 @@ from .Provider   import (
     Bing,
     You,
     H2o
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
 )
 
 @dataclass(unsafe_hash=True)
@@ -59,9 +44,6 @@ default = Model(
         Bing,         # Not fully GPT 3 or 4
         Yqcloud,      # Answers short questions in chinese
         ChatBase,     # Don't want to answer creatively
-<<<<<<< HEAD
-        DeepAi, ChatgptLogin, ChatgptAi, Aivvm, GptGo, AItianhu, Aichat,
-=======
         ChatgptDuo,   # Include search results
         Aibn, Aichat, Aivvm, ChatForAi, ChatgptAi, ChatgptLogin, DeepAi, FreeGpt, GptGo, Myshell, Ylokh,
     ])
@@ -74,7 +56,6 @@ gpt_35_long = Model(
     best_provider = RetryProvider([
         AiAsk, Aibn, Aichat, Aivvm, ChatForAi, ChatgptAi, ChatgptDemo, ChatgptDuo,
         FreeGpt, GptGo, Liaobots, Myshell, Vitalentum, Ylokh, You, Yqcloud
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
     ])
 )
 
@@ -83,24 +64,14 @@ gpt_35_turbo = Model(
     name          = 'gpt-3.5-turbo',
     base_provider = 'openai',
     best_provider = RetryProvider([
-<<<<<<< HEAD
-        DeepAi, ChatgptLogin, ChatgptAi, Aivvm, GptGo, AItianhu, Aichat,
-=======
-        DeepAi, ChatgptLogin, ChatgptAi, Aivvm, GptGo, AItianhu, Aichat, AItianhuSpace, Myshell, Aibn, ChatForAi, FreeGpt, Ylokh
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
+        DeepAi, ChatgptLogin, ChatgptAi, Aivvm, GptGo, AItianhu, Aichat, Myshell, Aibn, ChatForAi, FreeGpt, Ylokh
     ])
 )
 
 gpt_4 = Model(
     name          = 'gpt-4',
     base_provider = 'openai',
-<<<<<<< HEAD
-    best_provider = RetryProvider([
-            Aivvm
-    ])
-=======
     best_provider = Bing
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
 )
 
 # Bard

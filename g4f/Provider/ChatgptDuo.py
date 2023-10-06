@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 from __future__ import annotations
 
 from curl_cffi.requests import AsyncSession
@@ -57,4 +55,3 @@ class ChatgptDuo(AsyncProvider):
         ]
         param = ", ".join([": ".join(p) for p in params])
         return f"g4f.provider.{cls.__name__} supports: ({param})"
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab

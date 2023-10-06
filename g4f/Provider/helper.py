@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 from __future__ import annotations
 
 import asyncio, sys
@@ -70,4 +68,3 @@ def get_browser(user_data_dir: str = None):
         user_data_dir = path.join(user_data_dir, "Default")
 
     return Chrome(user_data_dir=user_data_dir)
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab

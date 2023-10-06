@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 from __future__ import annotations
 
 import json, uuid, hashlib, time, random
@@ -173,4 +171,3 @@ def generate_visitor_id(user_agent: str) -> str:
     d = xor_hash(user_agent)
     e = hex(1080 * 1920)[2:]
     return f"{f}-{r}-{d}-{e}-{f}"
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab

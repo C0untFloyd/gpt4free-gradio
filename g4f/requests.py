@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 from __future__ import annotations
 
 import warnings, json, asyncio
@@ -179,4 +177,3 @@ class StreamSession(AsyncSession):
     put = partialmethod(request, "PUT")
     patch = partialmethod(request, "PATCH")
     delete = partialmethod(request, "DELETE")
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab

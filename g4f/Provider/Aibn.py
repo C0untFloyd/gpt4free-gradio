@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 from __future__ import annotations
 
 import time
@@ -52,4 +50,3 @@ class Aibn(AsyncGeneratorProvider):
 def generate_signature(timestamp: int, message: str, secret: str = "undefined"):
     data = f"{timestamp}:{message}:{secret}"
     return hashlib.sha256(data.encode()).hexdigest()
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
