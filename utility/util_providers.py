@@ -25,7 +25,8 @@ def send_chat(selected_model, selected_provider, context_history):
     try:
         result = g4f.ChatCompletion.create(model=selected_model, stream=False, provider=prov,
                                            messages=context_history,auth=auth)
-        context_history.append({'role': 'assistant', 'content': str(result)})
+        if len(result) > 0:
+            context_history.append({'role': 'assistant', 'content': str(result)})
     except Exception as e:
         print(e)
         result = ''
@@ -50,7 +51,8 @@ def get_providers_for_model(m):
                 providers.append(p.__name__)
         else:
             prov = model.best_provider
-            providers.append(prov.__name__)
+            if hasattr(prov, '__name__'):
+                providers.append(prov.__name__)
     # else:
     #     if model.base_provider is not None:
     #         providers.append(model.base_provider)

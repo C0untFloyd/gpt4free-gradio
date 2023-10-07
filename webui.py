@@ -26,14 +26,31 @@ def prompt_ai(selected_model: str, selected_provider: str, prompt: str, chatbot)
 
     context_history.append({'role': 'user', 'content': str(prompt)})
     result, context_history = send_chat(selected_model, selected_provider, context_history)
+    if len(result) < 1:
+        result = f"{selected_model} from {selected_provider} didn't respond..."
+
     chatbot.append((prompt, result))
     return '',chatbot
 
-def check_providers():
-    return gr.Dropdown.update(choices=get_all_models())
+def check_providers(chatbot):
+    global modellist
+
+    for model in modellist:
+        provs = get_providers_for_model(model)
+        for p in provs:
+            context_history.clear()
+            _,chatbot = prompt_ai(model,p, f"Am I talking to {model} from {p}? Please tell me all about you, at least a version number and the date of your latest update.", chatbot)
+            info = get_provider_info(p)
+            yield info,chatbot
+    return info, chatbot
+
+
+
 
 
 def run():
+    global modellist
+
     available_themes = ["Default", "gradio/glass", "gradio/monochrome", "gradio/seafoam", "gradio/soft", "gstaff/xkcd", "freddyaboulton/dracula_revamped", "ysharma/steampunk"]
     modellist = get_all_models()
 
@@ -76,7 +93,7 @@ def run():
                 with gr.Column():
                     provider_info = gr.Markdown("")
                 with gr.Column():
-                    bt_check_providers = gr.Button("Check and update list", variant='secondary')
+                    bt_check_providers = gr.Button("Test chat to all models/providers", variant='secondary')
             with gr.Row(variant='panel'):
                 chatbot = gr.Chatbot(label="Response", show_copy_button=True, avatar_images=('user.png','chatbot.png'), bubble_full_width=False)
             with gr.Row(variant='panel'):
@@ -92,7 +109,7 @@ def run():
  
             select_model.change(fn=on_select_model, inputs=select_model, outputs=select_provider)
             select_provider.change(fn=on_select_provider, inputs=[select_provider], outputs=provider_info)
-            # bt_check_providers.click(fn=check_providers, outputs=[select_model])
+            bt_check_providers.click(fn=check_providers, inputs=[chatbot], outputs=[provider_info, chatbot])
             user_prompt.submit(fn=prompt_ai, inputs=[select_model, select_provider, user_prompt, chatbot], outputs=[user_prompt, chatbot])
             bt_send_prompt.click(fn=prompt_ai, inputs=[select_model, select_provider, user_prompt, chatbot], outputs=[user_prompt, chatbot])
             bt_clear_history.click(fn=on_clear_history, outputs=[chatbot])
