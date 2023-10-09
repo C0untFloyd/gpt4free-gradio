@@ -11,11 +11,11 @@ from ..typing import AsyncGenerator, CreateResult
 
 class BaseProvider(ABC):
     url: str
-    working               = False
-    needs_auth            = False
-    supports_stream       = False
-    supports_gpt_35_turbo = False
-    supports_gpt_4        = False
+    working: bool = False
+    needs_auth: bool = False
+    supports_stream: bool = False
+    supports_gpt_35_turbo: bool = False
+    supports_gpt_4: bool = False
 
     @staticmethod
     @abstractmethod
@@ -27,10 +27,35 @@ class BaseProvider(ABC):
     ) -> CreateResult:
         raise NotImplementedError()
 
+    @classmethod
+    async def create_async(
+        cls,
+        model: str,
+        messages: list[dict[str, str]],
+        *,
+        loop: AbstractEventLoop = None,
+        executor: ThreadPoolExecutor = None,
+        **kwargs
+    ) -> str:
+        if not loop:
+            loop = get_event_loop()
+
+        def create_func() -> str:
+            return "".join(cls.create_completion(
+                model,
+                messages,
+                False,
+                **kwargs
+            ))
+
+        return await loop.run_in_executor(
+            executor,
+            create_func
+        )
 
     @classmethod
     @property
-    def params(cls):
+    def params(cls) -> str:
         params = [
             ("model", "str"),
             ("messages", "list[dict[str, str]]"),
@@ -76,22 +101,19 @@ class AsyncGeneratorProvider(AsyncProvider):
         stream: bool = True,
         **kwargs
     ) -> CreateResult:
-        loop = create_event_loop()
-        try:
-            generator = cls.create_async_generator(
-                model,
-                messages,
-                stream=stream,
-                **kwargs
-            )
-            gen  = generator.__aiter__()
-            while True:
-                try:
-                    yield loop.run_until_complete(gen.__anext__())
-                except StopAsyncIteration:
-                    break
-        finally:
-            loop.close()
+        loop = get_event_loop()
+        generator = cls.create_async_generator(
+            model,
+            messages,
+            stream=stream,
+            **kwargs
+        )
+        gen = generator.__aiter__()
+        while True:
+            try:
+                yield loop.run_until_complete(gen.__anext__())
+            except StopAsyncIteration:
+                break
 
     @classmethod
     async def create_async(
@@ -108,7 +130,7 @@ class AsyncGeneratorProvider(AsyncProvider):
                 **kwargs
             )
         ])
-        
+
     @staticmethod
     @abstractmethod
     def create_async_generator(

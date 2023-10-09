@@ -18,10 +18,9 @@ from .Provider   import (
     Vercel, 
     DeepAi,
     Aichat,
+    GPTalk,
+    GptGod,
     AiAsk,
-    Aivvm, 
-    Bard, 
-    H2o,
     GptGo,
     Ylokh,
     Bard, 
@@ -45,7 +44,7 @@ default = Model(
         Yqcloud,      # Answers short questions in chinese
         ChatBase,     # Don't want to answer creatively
         ChatgptDuo,   # Include search results
-        Aibn, Aichat, Aivvm, ChatForAi, ChatgptAi, ChatgptLogin, DeepAi, FreeGpt, GptGo, Myshell, Ylokh,
+        Aibn, Aichat, ChatForAi, ChatgptAi, ChatgptLogin, DeepAi, FreeGpt, GptGo, Myshell, Ylokh,
     ])
 )
 
@@ -54,8 +53,9 @@ gpt_35_long = Model(
     name          = 'gpt-3.5-turbo',
     base_provider = 'openai',
     best_provider = RetryProvider([
-        AiAsk, Aibn, Aichat, Aivvm, ChatForAi, ChatgptAi, ChatgptDemo, ChatgptDuo,
-        FreeGpt, GptGo, Liaobots, Myshell, Vitalentum, Ylokh, You, Yqcloud
+        AiAsk, Aibn, Aichat, ChatForAi, ChatgptAi, ChatgptDemo, ChatgptDuo,
+        FreeGpt, GptGo, Liaobots, Myshell, Vitalentum, Ylokh, You, Yqcloud,
+        GPTalk, GptGod
     ])
 )
 
@@ -64,7 +64,7 @@ gpt_35_turbo = Model(
     name          = 'gpt-3.5-turbo',
     base_provider = 'openai',
     best_provider = RetryProvider([
-        DeepAi, ChatgptLogin, ChatgptAi, Aivvm, GptGo, AItianhu, Aichat, Myshell, Aibn, ChatForAi, FreeGpt, Ylokh
+        DeepAi, ChatgptLogin, ChatgptAi, GptGo, AItianhu, Aichat, AItianhuSpace, Myshell, Aibn, ChatForAi, FreeGpt, Ylokh
     ])
 )
 
@@ -168,14 +168,23 @@ gpt_35_turbo_16k_0613 = Model(
 
 gpt_35_turbo_0613 = Model(
     name          = 'gpt-3.5-turbo-0613',
-    base_provider = 'openai',
-    best_provider = [
-        Aivvm, ChatgptLogin])
+    base_provider = 'openai'
+)
 
 gpt_4_0613 = Model(
     name          = 'gpt-4-0613',
-    base_provider = 'openai',
-    best_provider = Vercel)
+    base_provider = 'openai'
+)
+
+gpt_4_32k = Model(
+    name          = 'gpt-4-32k',
+    base_provider = 'openai'
+)
+
+gpt_4_32k_0613 = Model(
+    name          = 'gpt-4-32k-0613',
+    base_provider = 'openai'
+)
 
 text_ada_001 = Model(
     name          = 'text-ada-001',
