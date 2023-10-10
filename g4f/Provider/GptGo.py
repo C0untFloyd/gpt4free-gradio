@@ -3,7 +3,7 @@ from __future__ import annotations
 from aiohttp import ClientSession
 import json
 
-from ..typing       import AsyncGenerator
+from ..typing       import AsyncResult, Messages
 from .base_provider import AsyncGeneratorProvider, format_prompt
 
 
@@ -16,11 +16,10 @@ class GptGo(AsyncGeneratorProvider):
     async def create_async_generator(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         proxy: str = None,
-        timeout: int = 30,
         **kwargs
-    ) -> AsyncGenerator:
+    ) -> AsyncResult:
         headers = {
             "User-Agent"         : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
             "Accept"             : "*/*",
@@ -73,6 +72,7 @@ class GptGo(AsyncGeneratorProvider):
             ("model", "str"),
             ("messages", "list[dict[str, str]]"),
             ("stream", "bool"),
+            ("proxy", "str"),
             ("temperature", "float"),
         ]
         param = ", ".join([": ".join(p) for p in params])

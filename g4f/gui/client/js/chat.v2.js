@@ -52,7 +52,7 @@ const remove_cancel_button = async () => {
 
 const ask_gpt = async (message) => {
     try {
-        message_input.value = ``;
+        message_input.value     = ``;
         message_input.innerHTML = ``;
         message_input.innerText = ``;
 
@@ -60,10 +60,11 @@ const ask_gpt = async (message) => {
         window.scrollTo(0, 0);
         window.controller = new AbortController();
 
-        jailbreak = document.getElementById("jailbreak");
-        model = document.getElementById("model");
-        prompt_lock = true;
-        window.text = ``;
+        jailbreak    = document.getElementById("jailbreak");
+        provider     = document.getElementById("provider");
+        model        = document.getElementById("model");
+        prompt_lock  = true;
+        window.text  = ``;
         window.token = message_id();
 
         stop_generating.classList.remove(`stop_generating-hidden`);
@@ -109,12 +110,15 @@ const ask_gpt = async (message) => {
             headers: {
                 "content-type": `application/json`,
                 accept: `text/event-stream`,
+                // v: `1.0.0`,
+                // ts: Date.now().toString(),
             },
             body: JSON.stringify({
                 conversation_id: window.conversation_id,
                 action: `_ask`,
                 model: model.options[model.selectedIndex].value,
                 jailbreak: jailbreak.options[jailbreak.selectedIndex].value,
+                provider: provider.options[provider.selectedIndex].value,
                 meta: {
                     id: window.token,
                     content: {
@@ -140,10 +144,6 @@ const ask_gpt = async (message) => {
 
             chunk = new TextDecoder().decode(value);
 
-            if (chunk.includes(`<form id="challenge-form" action="/backend-api/v2/conversation?`)) {
-                chunk = `cloudflare token expired, please refresh the page.`;
-            }
-
             text += chunk;
 
             document.getElementById(`gpt_${window.token}`).innerHTML =
@@ -156,12 +156,7 @@ const ask_gpt = async (message) => {
             message_box.scrollTo({ top: message_box.scrollHeight, behavior: "auto" });
         }
 
-        // if text contains :
-        if (text.includes(`instead. Maintaining this website and API costs a lot of money`)) {
-            document.getElementById(`gpt_${window.token}`).innerHTML = "An error occured, please reload / refresh cache and try again or use a differnet browser";
-        }
-
-        if (text.includes(`anerroroccuredmf`)) {
+        if (text.includes(`G4F_ERROR`)) {
             document.getElementById(`gpt_${window.token}`).innerHTML = "An error occured, please try again, if the problem persists, please reload / refresh cache or use a differnet browser";
         }
 
@@ -543,7 +538,7 @@ colorThemes.forEach((themeOption) => {
 setTimeout(() => {
     ads_div = document.querySelector('.ads')
 
-    if (ads_div.getElementsByTagName("iframe").length == 0) {
+    if (ads_div != null && ads_div.getElementsByTagName("iframe").length == 0) {
         ads_div.removeChild(ads_div.querySelector('.sorry'))
 
         ads_div.innerHTML += `

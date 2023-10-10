@@ -4,8 +4,9 @@ import json
 
 from aiohttp import ClientSession
 
-from ...typing import Any, AsyncGenerator
-from ..base_provider import AsyncGeneratorProvider, format_prompt, get_cookies
+from ...typing import AsyncResult, Messages
+from ..base_provider import AsyncGeneratorProvider
+from ..helper import format_prompt, get_cookies
 
 
 class OpenAssistant(AsyncGeneratorProvider):
@@ -18,13 +19,11 @@ class OpenAssistant(AsyncGeneratorProvider):
     async def create_async_generator(
         cls,
         model: str,
-        messages: list[dict[str, str]],
+        messages: Messages,
         proxy: str = None,
         cookies: dict = None,
-        **kwargs: Any
-    ) -> AsyncGenerator:
-        if proxy and "://" not in proxy:
-            proxy = f"http://{proxy}"
+        **kwargs
+    ) -> AsyncResult:
         if not cookies:
             cookies = get_cookies("open-assistant.io")
 

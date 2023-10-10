@@ -11,3 +11,4 @@ flask-cors
 gradio
 typing-extensions
 PyExecJS
+duckduckgo-search

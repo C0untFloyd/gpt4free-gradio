@@ -1,8 +1,9 @@
 from __future__ import annotations
+import requests
 
-from ..requests import StreamSession
-from .base_provider import AsyncGeneratorProvider
-from ..typing import AsyncGenerator
+from .base_provider import BaseProvider
+from ..typing import CreateResult
+from json import dumps
 
 models = {
     'gpt-3.5-turbo': {'id': 'gpt-3.5-turbo', 'name': 'GPT-3.5'},
@@ -15,21 +16,20 @@ models = {
     'gpt-4-32k-0613': {'id': 'gpt-4-32k-0613', 'name': 'GPT-4-32K-0613'},
 }
 
-class Aivvm(AsyncGeneratorProvider):
+class Aivvm(BaseProvider):
     url                   = 'https://chat.aivvm.com'
+    supports_stream       = True
+    working               = True
     supports_gpt_35_turbo = True
     supports_gpt_4        = True
-    working = True
 
     @classmethod
-    async def create_async_generator(
-        cls,
+    def create_completion(cls,
         model: str,
         messages: list[dict[str, str]],
         stream: bool,
-        timeout: int = 30,
         **kwargs
-    ) -> AsyncGenerator:
+    ) -> CreateResult:
         if not model:
             model = "gpt-3.5-turbo"
         elif model not in models:
@@ -42,19 +42,33 @@ class Aivvm(AsyncGeneratorProvider):
             "prompt"      : "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
             "temperature" : kwargs.get("temperature", 0.7)
         }
+
+        data = dumps(json_data)
+
         headers = {
-            "Accept": "*/*",
-            "Origin": cls.url,
-            "Referer": f"{cls.url}/",
+            "accept"            : "text/event-stream",
+            "accept-language"   : "en-US,en;q=0.9",
+            "content-type"      : "application/json",
+            "content-length"    : str(len(data)),
+            "sec-ch-ua"         : "\"Chrome\";v=\"117\", \"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"117\"",
+            "sec-ch-ua-mobile"  : "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest"    : "empty",
+            "sec-fetch-mode"    : "cors",
+            "sec-fetch-site"    : "same-origin",
+            "sec-gpc"           : "1",
+            "referrer"          : "https://chat.aivvm.com/",
+            "user-agent"        : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
         }
-        async with StreamSession(impersonate="chrome107", headers=headers, timeout=timeout) as session:
-            async with session.post(f"{cls.url}/api/chat", json=json_data) as response:
-                response.raise_for_status()
-                async for chunk in response.iter_content():
-                    if b'Access denied | chat.aivvm.com used Cloudflare' in chunk:
-                        raise ValueError("Rate Limit | use another provider")
-                    
-                    yield chunk.decode()
+
+        response = requests.post("https://chat.aivvm.com/api/chat", headers=headers, data=data, stream=True)
+        response.raise_for_status()
+
+        for chunk in response.iter_content(chunk_size=4096):
+            try:
+                yield chunk.decode("utf-8")
+            except UnicodeDecodeError:
+                yield chunk.decode("unicode-escape")
 
     @classmethod
     @property

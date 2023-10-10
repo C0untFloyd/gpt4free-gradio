@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json, base64, requests, execjs, random, uuid
 
-from ..typing       import Any, TypedDict, CreateResult
+from ..typing       import Messages, TypedDict, CreateResult
 from .base_provider import BaseProvider
 from abc            import abstractmethod
 
@@ -17,8 +17,15 @@ class Vercel(BaseProvider):
     @abstractmethod
     def create_completion(
         model: str,
-        messages: list[dict[str, str]],
-        stream: bool, **kwargs ) -> CreateResult:
+        messages: Messages,
+        stream: bool,
+        proxy: str = None,
+        **kwargs
+    ) -> CreateResult:
+        if not model:
+            model = "gpt-3.5-turbo"
+        elif model not in model_info:
+            raise ValueError(f"Model are not supported: {model}")
 
         headers = {
             'authority'         : 'sdk.vercel.ai',
@@ -46,7 +53,10 @@ class Vercel(BaseProvider):
             'model'       : model_info[model]['id'],
             'messages'    : messages,
             'playgroundId': str(uuid.uuid4()),
-            'chatIndex'   : 0} | model_info[model]['default_params']
+            'chatIndex'   : 0,
+            **model_info[model]['default_params'],
+            **kwargs
+        }
 
         server_error = True
         retries      = 0
@@ -54,14 +64,15 @@ class Vercel(BaseProvider):
         
         while server_error and not retries > max_retries:
             response = requests.post('https://sdk.vercel.ai/api/generate', 
-                                    headers=headers, json=json_data, stream=True)
+                                    headers=headers, json=json_data, stream=True, proxies={"https": proxy})
+            try:
+                response.raise_for_status()
+            except Exception:
+                continue
+            for token in response.iter_content(chunk_size=None):
+                yield token.decode()
+            break
 
-            for token in response.iter_content(chunk_size=2046):
-                if token != b'Internal Server Error':
-                    server_error = False
-                    yield (token.decode())
-                    
-            retries += 1
 
 def AntiBotToken() -> str:
     headers = {
