@@ -33,7 +33,7 @@ class Vercel(BaseProvider):
             'accept-language'   : 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
             'cache-control'     : 'no-cache',
             'content-type'      : 'application/json',
-            'custom-encoding'   : AntiBotToken(),
+            'custom-encoding'   : get_anti_bot_token(),
             'origin'            : 'https://sdk.vercel.ai',
             'pragma'            : 'no-cache',
             'referer'           : 'https://sdk.vercel.ai/',
@@ -58,11 +58,8 @@ class Vercel(BaseProvider):
             **kwargs
         }
 
-        server_error = True
-        retries      = 0
         max_retries  = kwargs.get('max_retries', 20)
-        
-        while server_error and not retries > max_retries:
+        for i in range(max_retries):
             response = requests.post('https://sdk.vercel.ai/api/generate', 
                                     headers=headers, json=json_data, stream=True, proxies={"https": proxy})
             try:
@@ -74,7 +71,7 @@ class Vercel(BaseProvider):
             break
 
 
-def AntiBotToken() -> str:
+def get_anti_bot_token() -> str:
     headers = {
         'authority'         : 'sdk.vercel.ai',
         'accept'            : '*/*',
