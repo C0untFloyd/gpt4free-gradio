@@ -11,8 +11,3 @@ flask-cors
 gradio
 typing-extensions
 PyExecJS
-<<<<<<< HEAD
-=======
-flask
-flask-cors
->>>>>>> 31354a68afba030e506abda0c865f6aa74a318ab
