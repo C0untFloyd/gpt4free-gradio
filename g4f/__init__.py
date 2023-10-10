@@ -82,10 +82,6 @@ class ChatCompletion:
 
         model, provider = get_model_and_provider(model, provider, False)
 
-        provider_type = provider if isinstance(provider, type) else type(provider)
-        if not issubclass(provider_type, AsyncProvider):
-            raise Exception(f"Provider: {provider.__name__} doesn't support create_async")
-
         return await provider.create_async(model.name, messages, **kwargs)
 
 class Completion:
