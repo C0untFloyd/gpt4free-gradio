@@ -1,44 +1,63 @@
 from __future__ import annotations
-from .Acytoo          import Acytoo
-from .AiAsk           import AiAsk
-from .Aibn            import Aibn
-from .Aichat          import Aichat
-from .Ails            import Ails
-from .Aivvm           import Aivvm
-from .AItianhu        import AItianhu
-from .AItianhuSpace   import AItianhuSpace
-from .Bing            import Bing
-from .ChatBase        import ChatBase
-from .ChatForAi       import ChatForAi
-from .Chatgpt4Online  import Chatgpt4Online
-from .ChatgptAi       import ChatgptAi
-from .ChatgptDemo     import ChatgptDemo
-from .ChatgptDuo      import ChatgptDuo
-from .ChatgptX        import ChatgptX
-from .Cromicle        import Cromicle
-from .DeepAi          import DeepAi
-from .FreeGpt         import FreeGpt
-from .GPTalk          import GPTalk
-from .GptForLove      import GptForLove
-from .GptGo           import GptGo
-from .GptGod          import GptGod
-from .H2o             import H2o
-from .Liaobots        import Liaobots
-from .Myshell         import Myshell
-from .Phind           import Phind
-from .Vercel          import Vercel
-from .Vitalentum      import Vitalentum
-from .Ylokh           import Ylokh
-from .You             import You
-from .Yqcloud         import Yqcloud
 
-from .base_provider  import BaseProvider, AsyncProvider, AsyncGeneratorProvider
-from .retry_provider import RetryProvider
-from .deprecated     import *
-from .needs_auth     import *
-from .unfinished     import *
+from ..providers.types          import BaseProvider, ProviderType
+from ..providers.retry_provider import RetryProvider, IterProvider
+from ..providers.base_provider  import AsyncProvider, AsyncGeneratorProvider
+from ..providers.create_images  import CreateImagesProvider
+
+from .deprecated      import *
+from .not_working     import *
+from .selenium        import *
+from .needs_auth      import *
+from .unfinished      import *
+
+from .Aura             import Aura
+from .Bing             import Bing
+from .BingCreateImages import BingCreateImages
+from .ChatForAi        import ChatForAi
+from .Chatgpt4Online   import Chatgpt4Online
+from .ChatgptAi        import ChatgptAi
+from .ChatgptFree      import ChatgptFree
+from .ChatgptNext      import ChatgptNext
+from .ChatgptX         import ChatgptX
+from .DeepInfra        import DeepInfra
+from .FlowGpt          import FlowGpt
+from .FreeChatgpt      import FreeChatgpt
+from .FreeGpt          import FreeGpt
+from .GigaChat         import GigaChat
+from .GeminiPro        import GeminiPro
+from .GeminiProChat    import GeminiProChat
+from .GptTalkRu        import GptTalkRu
+from .HuggingChat      import HuggingChat
+from .HuggingFace      import HuggingFace
+from .Koala            import Koala
+from .Liaobots         import Liaobots
+from .Llama2           import Llama2
+from .PerplexityLabs   import PerplexityLabs
+from .Pi               import Pi
+from .Vercel           import Vercel
+from .You              import You
+
+import sys
+
+__modules__: list = [
+    getattr(sys.modules[__name__], provider) for provider in dir()
+    if not provider.startswith("__")
+]
+__providers__: list[ProviderType] = [
+    provider for provider in __modules__
+    if isinstance(provider, type)
+    and issubclass(provider, BaseProvider)
+]
+__all__: list[str] = [
+    provider.__name__ for provider in __providers__
+]
+__map__: dict[str, ProviderType] = dict([
+    (provider.__name__, provider) for provider in __providers__
+])
 
 class ProviderUtils:
+<<<<<<< HEAD
     convert: dict[str, BaseProvider] = {
         'AItianhu': AItianhu,
         'AItianhuSpace': AItianhuSpace,
@@ -158,3 +177,6 @@ __all__ = [
     'Wuguokai',
     'V50'
 ]
+=======
+    convert: dict[str, ProviderType] = __map__
+>>>>>>> upstream/main

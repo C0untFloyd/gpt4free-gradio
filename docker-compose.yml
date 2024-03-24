@@ -2,12 +2,19 @@ version: '3'
 
 services:
   gpt4free:
+    image: hlohaus789/g4f:latest
+    shm_size: 2gb
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     volumes:
       - .:/app
     ports:
+      - '8080:8080'
       - '1337:1337'
+<<<<<<< HEAD
     environment:
       - PYTHONUNBUFFERED=1
+=======
+      - '7900:7900'
+>>>>>>> upstream/main

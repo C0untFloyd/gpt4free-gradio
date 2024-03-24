@@ -5,10 +5,10 @@ import random
 import requests
 
 from ...typing import Any, CreateResult
-from ..base_provider import BaseProvider, format_prompt
+from ..base_provider import AbstractProvider, format_prompt
 
 
-class Wuguokai(BaseProvider):
+class Wuguokai(AbstractProvider):
     url = 'https://chat.wuguokai.xyz'
     supports_gpt_35_turbo = True
     working = False
@@ -41,23 +41,17 @@ class Wuguokai(BaseProvider):
             "userId": f"#/chat/{random.randint(1,99999999)}",
             "usingContext": True
         }
-        response = requests.post("https://ai-api20.wuguokai.xyz/api/chat-process", headers=headers, timeout=3, json=data, proxies=kwargs['proxy'] if 'proxy' in kwargs else {})
+        response = requests.post(
+            "https://ai-api20.wuguokai.xyz/api/chat-process",
+            headers=headers,
+            timeout=3,
+            json=data,
+            proxies=kwargs.get('proxy', {}),
+        )
         _split = response.text.split("> 若回答失败请重试或多刷新几次界面后重试")
-        if response.status_code == 200:
-            if len(_split) > 1:
-                yield _split[1].strip()
-            else:
-                yield _split[0].strip()
-        else:
+        if response.status_code != 200:
             raise Exception(f"Error: {response.status_code} {response.reason}")
-
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool")
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"
+        if len(_split) > 1:
+            yield _split[1].strip()
+        else:
+            yield _split[0].strip()

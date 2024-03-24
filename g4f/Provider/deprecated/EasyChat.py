@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import json
 import random
-
 import requests
 
 from ...typing import Any, CreateResult
-from ..base_provider import BaseProvider
+from ..base_provider import AbstractProvider
 
 
-class EasyChat(BaseProvider):
+class EasyChat(AbstractProvider):
     url: str              = "https://free.easychat.work"
     supports_stream       = True
     supports_gpt_35_turbo = True
@@ -30,7 +29,7 @@ class EasyChat(BaseProvider):
             "https://chat4.fastgpt.me",
             "https://gxos1h1ddt.fastgpt.me"
         ]
-        
+
         server  = active_servers[kwargs.get("active_server", random.randint(0, 5))]
         headers = {
             "authority"         : f"{server}".replace("https://", ""),
@@ -68,44 +67,23 @@ class EasyChat(BaseProvider):
 
         response = session.post(f"{server}/api/openai/v1/chat/completions",
             headers=headers, json=json_data, stream=stream)
-        
-        if response.status_code == 200:
-            
-            if stream == False:
-                json_data = response.json()
-                
-                if "choices" in json_data:
-                    yield json_data["choices"][0]["message"]["content"]
-                else:
-                    raise Exception("No response from server")
-            
-            else:
-                
-                for chunk in response.iter_lines():
-                    
-                    if b"content" in chunk:
-                        splitData = chunk.decode().split("data:")
-                        
-                        if len(splitData) > 1:
-                            yield json.loads(splitData[1])["choices"][0]["delta"]["content"]
-                        else:
-                            continue
-        else:
+
+        if response.status_code != 200:
             raise Exception(f"Error {response.status_code} from server : {response.reason}")
+        if not stream:
+            json_data = response.json()
 
+            if "choices" in json_data:
+                yield json_data["choices"][0]["message"]["content"]
+            else:
+                raise Exception("No response from server")
 
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool"),
-            ("temperature", "float"),
-            ("presence_penalty", "int"),
-            ("frequency_penalty", "int"),
-            ("top_p", "int"),
-            ("active_server", "int"),
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"
+        else:
+                
+            for chunk in response.iter_lines():
+                    
+                if b"content" in chunk:
+                    splitData = chunk.decode().split("data:")
+
+                    if len(splitData) > 1:
+                        yield json.loads(splitData[1])["choices"][0]["delta"]["content"]

@@ -7,10 +7,10 @@ import time
 import requests
 
 from ...typing import Any, CreateResult
-from ..base_provider import BaseProvider
+from ..base_provider import AbstractProvider
 
 
-class DfeHub(BaseProvider):
+class DfeHub(AbstractProvider):
     url                   = "https://chat.dfehub.com/"
     supports_stream       = True
     supports_gpt_35_turbo = True
@@ -60,18 +60,3 @@ class DfeHub(BaseProvider):
             if b"content" in chunk:
                 data = json.loads(chunk.decode().split("data: ")[1])
                 yield (data["choices"][0]["delta"]["content"])
-
-    @classmethod
-    @property
-    def params(cls):
-        params = [
-            ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
-            ("stream", "bool"),
-            ("temperature", "float"),
-            ("presence_penalty", "int"),
-            ("frequency_penalty", "int"),
-            ("top_p", "int"),
-        ]
-        param = ", ".join([": ".join(p) for p in params])
-        return f"g4f.provider.{cls.__name__} supports: ({param})"

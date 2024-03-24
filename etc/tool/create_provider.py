@@ -7,9 +7,10 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 import g4f
 
+g4f.debug.logging = True
+
 def read_code(text):
-    match = re.search(r"```(python|py|)\n(?P<code>[\S\s]+?)\n```", text)
-    if match:
+    if match := re.search(r"```(python|py|)\n(?P<code>[\S\s]+?)\n```", text):
         return match.group("code")
 
 def input_command():
@@ -37,9 +38,9 @@ from .helper import format_prompt
 
 
 class ChatGpt(AsyncGeneratorProvider):
-    url                   = "https://chat-gpt.com"
+    url = "https://chat-gpt.com"
+    working = True
     supports_gpt_35_turbo = True
-    working               = True
 
     @classmethod
     async def create_async_generator(
@@ -99,12 +100,11 @@ And replace "gpt-3.5-turbo" with `model`.
     print()
     response = "".join(response)
 
-    code = read_code(response)
-    if code:
+    if code := read_code(response):
         with open(provider_path, "w") as file:
             file.write(code)
         print("Saved at:", provider_path)
-        with open(f"g4f/Provider/__init__.py", "a") as file:
+        with open("g4f/Provider/__init__.py", "a") as file:
             file.write(f"\nfrom .{name} import {name}")
 else:
     with open(provider_path, "r") as file:
