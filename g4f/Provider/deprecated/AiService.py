@@ -3,10 +3,10 @@ from __future__ import annotations
 import requests
 
 from ...typing import Any, CreateResult, Messages
-from ..base_provider import AbstractProvider
+from ..base_provider import BaseProvider
 
 
-class AiService(AbstractProvider):
+class AiService(BaseProvider):
     url = "https://aiservice.vercel.app/"
     working = False
     supports_gpt_35_turbo = True
@@ -18,12 +18,9 @@ class AiService(AbstractProvider):
         stream: bool,
         **kwargs: Any,
     ) -> CreateResult:
-        base = (
-            "\n".join(
-                f"{message['role']}: {message['content']}" for message in messages
-            )
-            + "\nassistant: "
-        )
+        base = "\n".join(f"{message['role']}: {message['content']}" for message in messages)
+        base += "\nassistant: "
+
         headers = {
             "accept": "*/*",
             "content-type": "text/plain;charset=UTF-8",

@@ -5,10 +5,10 @@ import json
 import requests
 
 from ...typing import Any, CreateResult
-from ..base_provider import AbstractProvider
+from ..base_provider import BaseProvider
 
 
-class Forefront(AbstractProvider):
+class Forefront(BaseProvider):
     url                   = "https://forefront.com"
     supports_stream       = True
     supports_gpt_35_turbo = True

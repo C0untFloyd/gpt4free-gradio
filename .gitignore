@@ -40,22 +40,10 @@ lab.js
 bing.py
 bing2.py
 .DS_Store
+MANIFEST.in
 lab/*
 lab
-tstt.py
-providerstest.py
-prv.py
 # Emacs crap
 *~
-<<<<<<< HEAD
 .vscode/launch.json
 run.bat
-=======
-x.js
-x.py
-info.txt
-local.py
-*.gguf
-image.py
-.buildozer
->>>>>>> upstream/main

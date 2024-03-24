@@ -5,10 +5,10 @@ import json
 import requests
 
 from ...typing import CreateResult, Messages
-from ..base_provider import AbstractProvider
+from ..base_provider import BaseProvider
 
 
-class Raycast(AbstractProvider):
+class Raycast(BaseProvider):
     url                     = "https://raycast.com"
     supports_gpt_35_turbo   = True
     supports_gpt_4          = True
@@ -32,10 +32,12 @@ class Raycast(AbstractProvider):
             'Content-Type': 'application/json',
             'User-Agent': 'Raycast/0 CFNetwork/1410.0.3 Darwin/22.6.0',
         }
-        parsed_messages = [
-            {'author': message['role'], 'content': {'text': message['content']}}
-            for message in messages
-        ]
+        parsed_messages = []
+        for message in messages:
+            parsed_messages.append({
+                'author': message['role'],
+                'content': {'text': message['content']}
+            })
         data = {
             "debug": False,
             "locale": "en-CN",
@@ -60,3 +62,18 @@ class Raycast(AbstractProvider):
             token = completion_chunk['text']
             if token != None:
                 yield token
+
+    @classmethod
+    @property
+    def params(cls):
+        params = [
+            ("model", "str"),
+            ("messages", "list[dict[str, str]]"),
+            ("stream", "bool"),
+            ("temperature", "float"),
+            ("top_p", "int"),
+            ("model", "str"),
+            ("auth", "str"),
+        ]
+        param = ", ".join([": ".join(p) for p in params])
+        return f"g4f.provider.{cls.__name__} supports: ({param})"

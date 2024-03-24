@@ -7,7 +7,7 @@ from aiohttp import ClientSession
 from ..typing import AsyncResult, Messages
 from .base_provider import AsyncGeneratorProvider
 from .helper import format_prompt
-from ..errors import RateLimitError
+
 
 class ChatgptX(AsyncGeneratorProvider):
     url = "https://chatgptx.de"
@@ -35,20 +35,13 @@ class ChatgptX(AsyncGeneratorProvider):
         async with ClientSession(headers=headers) as session:
             async with session.get(f"{cls.url}/", proxy=proxy) as response:
                 response = await response.text()
-
-                result = re.search(
-                    r'<meta name="csrf-token" content="(.*?)"', response
-                )
+                result = re.search(r'<meta name="csrf-token" content="(.*?)"', response)
                 if result:
                     csrf_token = result.group(1)
-
                 result = re.search(r"openconversions\('(.*?)'\)", response)
                 if result:
                     chat_id = result.group(1)
-
-                result = re.search(
-                    r'<input type="hidden" id="user_id" value="(.*?)"', response
-                )
+                result = re.search(r'<input type="hidden" id="user_id" value="(.*?)"', response)
                 if result:
                     user_id = result.group(1)
 
@@ -70,11 +63,9 @@ class ChatgptX(AsyncGeneratorProvider):
                 'x-csrf-token': csrf_token,
                 'x-requested-with': 'XMLHttpRequest'
             }
-            async with session.post(f'{cls.url}/sendchat', data=data, headers=headers, proxy=proxy) as response:
+            async with session.post(cls.url + '/sendchat', data=data, headers=headers, proxy=proxy) as response:
                 response.raise_for_status()
                 chat = await response.json()
-                if "messages" in  chat and "Anfragelimit" in chat["messages"]:
-                    raise RateLimitError("Rate limit reached")
                 if "response" not in chat or not chat["response"]:
                     raise RuntimeError(f'Response: {chat}')
             headers = {
@@ -87,6 +78,7 @@ class ChatgptX(AsyncGeneratorProvider):
             data = {
                 "user_id": user_id,
                 "chats_id": chat_id,
+                "prompt": format_prompt(messages),
                 "current_model": "gpt3",
                 "conversions_id": chat["conversions_id"],
                 "ass_conversions_id": chat["ass_conversions_id"],

@@ -1,20 +1,14 @@
 from __future__ import annotations
 
-import time
-import hashlib
-import uuid
-
 from ..typing import AsyncResult, Messages
 from ..requests import StreamSession
-from ..errors import RateLimitError
-from .base_provider import AsyncGeneratorProvider, ProviderModelMixin
+from .base_provider import AsyncGeneratorProvider
 
-class ChatForAi(AsyncGeneratorProvider, ProviderModelMixin):
-    url = "https://chatforai.store"
-    working = True
-    default_model = "gpt-3.5-turbo"
-    supports_message_history = True
+
+class ChatForAi(AsyncGeneratorProvider):
+    url                   = "https://chatforai.com"
     supports_gpt_35_turbo = True
+    working               = True
 
     @classmethod
     async def create_async_generator(
@@ -23,46 +17,38 @@ class ChatForAi(AsyncGeneratorProvider, ProviderModelMixin):
         messages: Messages,
         proxy: str = None,
         timeout: int = 120,
-        temperature: float = 0.7,
-        top_p: float = 1,
         **kwargs
     ) -> AsyncResult:
-        model = cls.get_model(model)
-        headers = {
-            "Content-Type": "text/plain;charset=UTF-8",
-            "Origin": cls.url,
-            "Referer": f"{cls.url}/?r=b",
-        }
-        async with StreamSession(impersonate="chrome", headers=headers, proxies={"https": proxy}, timeout=timeout) as session:
-            timestamp = int(time.time() * 1e3)
-            conversation_id = str(uuid.uuid4())
+        async with StreamSession(impersonate="chrome107", proxies={"https": proxy}, timeout=timeout) as session:
+            prompt = messages[-1]["content"]
             data = {
-                "conversationId": conversation_id,
+                "conversationId": "temp",
                 "conversationType": "chat_continuous",
                 "botId": "chat_continuous",
                 "globalSettings":{
                     "baseUrl": "https://api.openai.com",
-                    "model": model,
+                    "model": model if model else "gpt-3.5-turbo",
                     "messageHistorySize": 5,
-                    "temperature": temperature,
-                    "top_p": top_p,
+                    "temperature": 0.7,
+                    "top_p": 1,
                     **kwargs
                 },
-                "prompt": "",
+                "botSettings": {},
+                "prompt": prompt,
                 "messages": messages,
-                "timestamp": timestamp,
-                "sign": generate_signature(timestamp, "", conversation_id)
             }
             async with session.post(f"{cls.url}/api/handle/provider-openai", json=data) as response:
-                if response.status == 429:
-                    raise RateLimitError("Rate limit reached")
                 response.raise_for_status()
                 async for chunk in response.iter_content():
-                    if b"https://chatforai.store" in chunk:
-                        raise RuntimeError(f"Response: {chunk.decode()}")
                     yield chunk.decode()
 
-    
-def generate_signature(timestamp: int, message: str, id: str):
-    buffer = f"{id}:{timestamp}:{message}:h496Jd6b"
-    return hashlib.sha256(buffer.encode()).hexdigest()
+    @classmethod
+    @property
+    def params(cls):
+        params = [
+            ("model", "str"),
+            ("messages", "list[dict[str, str]]"),
+            ("stream", "bool"),
+        ]
+        param = ", ".join([": ".join(p) for p in params])
+        return f"g4f.provider.{cls.__name__} supports: ({param})"

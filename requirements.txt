@@ -1,10 +1,9 @@
 requests
 pycryptodome
-curl_cffi>=0.6.2
+curl_cffi
 aiohttp
 certifi
 browser_cookie3
-<<<<<<< HEAD
 websockets
 js2py
 flask
@@ -13,21 +12,3 @@ gradio
 typing-extensions
 PyExecJS
 duckduckgo-search
-=======
-PyExecJS
-duckduckgo-search>=5.0
-nest_asyncio
-werkzeug
-loguru
-pillow
-platformdirs
-fastapi
-uvicorn
-flask
-brotli
-beautifulsoup4
-aiohttp_socks
-gpt4all
-pywebview
-plyer
->>>>>>> upstream/main

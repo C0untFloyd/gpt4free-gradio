@@ -5,19 +5,16 @@ import time, hashlib, random
 from ..typing import AsyncResult, Messages
 from ..requests import StreamSession
 from .base_provider import AsyncGeneratorProvider
-from ..errors import RateLimitError
 
 domains = [
-    "https://s.aifree.site",
-    "https://v.aifree.site/"
+    'https://k.aifree.site',
+    'https://p.aifree.site'
 ]
 
 class FreeGpt(AsyncGeneratorProvider):
-    url = "https://freegptsnav.aifree.site"
-    working = True
-    supports_message_history = True
-    supports_system_message = True
+    url                   = "https://freegpts1.aifree.site/"
     supports_gpt_35_turbo = True
+    working               = True
 
     @classmethod
     async def create_async_generator(
@@ -41,14 +38,22 @@ class FreeGpt(AsyncGeneratorProvider):
                 "pass": None,
                 "sign": generate_signature(timestamp, prompt)
             }
-            domain = random.choice(domains)
-            async with session.post(f"{domain}/api/generate", json=data) as response:
+            url = random.choice(domains)
+            async with session.post(f"{url}/api/generate", json=data) as response:
                 response.raise_for_status()
                 async for chunk in response.iter_content():
-                    chunk = chunk.decode()
-                    if chunk == "当前地区当日额度已消耗完":
-                        raise RateLimitError("Rate limit reached")
-                    yield chunk
+                    yield chunk.decode()
+
+    @classmethod
+    @property
+    def params(cls):
+        params = [
+            ("model", "str"),
+            ("messages", "list[dict[str, str]]"),
+            ("stream", "bool"),
+        ]
+        param = ", ".join([": ".join(p) for p in params])
+        return f"g4f.provider.{cls.__name__} supports: ({param})"
     
 def generate_signature(timestamp: int, message: str, secret: str = ""):
     data = f"{timestamp}:{message}:{secret}"

@@ -5,10 +5,10 @@ import uuid
 import requests
 
 from ...typing import Any, CreateResult
-from ..base_provider import AbstractProvider
+from ..base_provider import BaseProvider
 
 
-class V50(AbstractProvider):
+class V50(BaseProvider):
     url                     = 'https://p5.v50.ltd'
     supports_gpt_35_turbo   = True
     supports_stream         = False
@@ -21,12 +21,9 @@ class V50(AbstractProvider):
         messages: list[dict[str, str]],
         stream: bool, **kwargs: Any) -> CreateResult:
         
-        conversation = (
-            "\n".join(
-                f"{message['role']}: {message['content']}" for message in messages
-            )
-            + "\nassistant: "
-        )
+        conversation = "\n".join(f"{message['role']}: {message['content']}" for message in messages)
+        conversation += "\nassistant: "
+
         payload = {
             "prompt"        : conversation,
             "options"       : {},
@@ -36,7 +33,7 @@ class V50(AbstractProvider):
             "model"         : model,
             "user"          : str(uuid.uuid4())
         }
-
+        
         headers = {
             'authority'         : 'p5.v50.ltd',
             'accept'            : 'application/json, text/plain, */*',
@@ -50,12 +47,21 @@ class V50(AbstractProvider):
             'sec-fetch-site'    : 'same-origin',
             'user-agent'        : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'
         }
-        response = requests.post(
-            "https://p5.v50.ltd/api/chat-process",
-            json=payload,
-            headers=headers,
-            proxies=kwargs.get('proxy', {}),
-        )
-
+        response = requests.post("https://p5.v50.ltd/api/chat-process", 
+                                json=payload, headers=headers, proxies=kwargs['proxy'] if 'proxy' in kwargs else {})
+        
         if "https://fk1.v50.ltd" not in response.text:
             yield response.text
+
+    @classmethod
+    @property
+    def params(cls):
+        params = [
+            ("model", "str"),
+            ("messages", "list[dict[str, str]]"),
+            ("stream", "bool"),
+            ("temperature", "float"),
+            ("top_p", "int"),
+        ]
+        param = ", ".join([": ".join(p) for p in params])
+        return f"g4f.provider.{cls.__name__} supports: ({param})"

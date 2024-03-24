@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import json
 import random
+from abc import ABC, abstractmethod
+
 import requests
 
 from ...typing import Any, CreateResult
-from ..base_provider import AbstractProvider
+from ..base_provider import BaseProvider
 
 
-class FastGpt(AbstractProvider):
+class FastGpt(BaseProvider):
     url: str                = 'https://chat9.fastgpt.me/'
     working                 = False
     needs_auth              = False
@@ -17,6 +19,7 @@ class FastGpt(AbstractProvider):
     supports_gpt_4          = False
 
     @staticmethod
+    @abstractmethod
     def create_completion(
         model: str,
         messages: list[dict[str, str]],
@@ -52,7 +55,7 @@ class FastGpt(AbstractProvider):
             'frequency_penalty' : kwargs.get('frequency_penalty', 0),
             'top_p'             : kwargs.get('top_p', 1),
         }
-
+        
         subdomain = random.choice([
             'jdaen979ew',
             'chat9'
@@ -60,17 +63,25 @@ class FastGpt(AbstractProvider):
 
         response = requests.post(f'https://{subdomain}.fastgpt.me/api/openai/v1/chat/completions',
                                  headers=headers, json=json_data, stream=stream)
-
+        
         for line in response.iter_lines():
             if line:
                 try:
                     if b'content' in line:
-                        line_json = json.loads(line.decode('utf-8').split('data: ')[1])
-                        token = line_json['choices'][0]['delta'].get(
-                            'content'
-                        )
-                        
-                        if token:
-                            yield token
+                            line_json = json.loads(line.decode('utf-8').split('data: ')[1])
+                            token = line_json['choices'][0]['delta'].get('content')
+                            if token:
+                                yield token
                 except:
                     continue
+
+    @classmethod
+    @property
+    def params(cls):
+        params = [
+            ("model", "str"),
+            ("messages", "list[dict[str, str]]"),
+            ("stream", "bool"),
+        ]
+        param = ", ".join([": ".join(p) for p in params])
+        return f"g4f.provider.{cls.__name__} supports: ({param})"

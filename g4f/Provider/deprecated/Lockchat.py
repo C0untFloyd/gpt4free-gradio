@@ -5,10 +5,10 @@ import json
 import requests
 
 from ...typing import Any, CreateResult
-from ..base_provider import AbstractProvider
+from ..base_provider import BaseProvider
 
 
-class Lockchat(AbstractProvider):
+class Lockchat(BaseProvider):
     url: str              = "http://supertest.lockchat.app"
     supports_stream       = True
     supports_gpt_35_turbo = True
@@ -33,22 +33,32 @@ class Lockchat(AbstractProvider):
         }
         response = requests.post("http://supertest.lockchat.app/v1/chat/completions",
                                  json=payload, headers=headers, stream=True)
-
+        
         response.raise_for_status()
         for token in response.iter_lines():
             if b"The model: `gpt-4` does not exist" in token:
                 print("error, retrying...")
-                
                 Lockchat.create_completion(
                     model       = model,
                     messages    = messages,
                     stream      = stream,
                     temperature = temperature,
                     **kwargs)
-
+            
             if b"content" in token:
                 token = json.loads(token.decode("utf-8").split("data: ")[1])
                 token = token["choices"][0]["delta"].get("content")
-
                 if token:
                     yield (token)
+
+    @classmethod
+    @property
+    def params(cls):
+        params = [
+            ("model", "str"),
+            ("messages", "list[dict[str, str]]"),
+            ("stream", "bool"),
+            ("temperature", "float"),
+        ]
+        param = ", ".join([": ".join(p) for p in params])
+        return f"g4f.provider.{cls.__name__} supports: ({param})"
